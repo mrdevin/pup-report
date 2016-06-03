@@ -1,6 +1,7 @@
 {
-  "name": "My App",
-  "short_name": "My App",
+  "name": "Pup Record",
+  "scope": "./",
+  "short_name": "Pup Rec",
     "icons": [{
       "src": "images/app-icon-32.png",
       "type": "image/png",

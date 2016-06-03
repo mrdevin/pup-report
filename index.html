@@ -49,7 +49,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   </script>
 
-  <link rel="import" href="/src/my-app.html">
+  <link rel="import" href="./bower_components/polymerfire/polymerfire.html">
+  <link rel="import" href="./src/pup-behavior.html">
+  <link rel="import" href="./src/pup-app.html">
+
+  <firebase-app auth-domain="pup-record.firebaseapp.com"
+    database-url="https://pup-record.firebaseio.com/"
+    api-key="AIzaSyDQ7aVerQHnqg0pz2wE1QDp_CXdZgaNVGg">
+
+    <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError">
+    </firebase-auth>
+  </firebase-app>
+
 
   <style>
 
@@ -66,7 +77,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </head>
 <body>
 
-  <my-app></my-app>
+  <pup-record></pup-record>
 
 </body>
 </html>

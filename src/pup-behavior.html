@@ -1,0 +1,73 @@
+<link rel="import" href="../bower_components/app-storage/app-network-status-behavior.html">
+<script>
+  (function(){
+    'use strict';
+
+    Polymer.PupAppBehaviorImpl = {
+      properties: {
+        editableNoteId: {
+          type: String,
+          notify: true
+        }
+      },
+
+
+
+
+
+
+      commitChange(event) {
+        var changeCommits;
+
+        switch (event.detail) {
+          case 'save':
+            changeCommits = this.save();
+            break;
+          case 'delete':
+            changeCommits = this.delete();
+            break;
+          default:
+            changeCommits = Promise.resolve();
+            break;
+        }
+
+        if (this.$.query && this.$.query.refresh) {
+          changeCommits.then(function() {
+            this.$.query.refresh();
+          });
+        }
+      },
+
+      save() {
+        if (this.$.document.isNew &&
+            (this.editableNote.title ||
+             this.editableNote.body)) {
+          return this.$.document.save(this.notesPath).then(function(){
+            this.$.document.reset();
+          });
+        }
+
+        return Promise.resolve();
+      },
+
+      delete() {
+        if (!this.$.document.isNew) {
+          this.$.document.destroy();
+        }
+
+        return Promise.resolve();
+      },
+
+      signOut() {
+        if (this.$.auth) {
+          this.$.auth.signOut();
+        }
+      }
+    };
+
+    Polymer.PupAppBehavior = [
+      Polymer.AppNetworkStatusBehavior,
+      Polymer.PupAppBehaviorImpl
+    ];
+  })();
+</script>
