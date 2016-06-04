@@ -30,7 +30,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="pup-record">
 
   <template>
-
     <style>
 
       :host {
@@ -77,6 +76,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         data="{{routeData}}"
         tail="{{subroute}}"></app-route>
 
+    <firebase-app auth-domain="pup-record.firebaseapp.com"
+        database-url="https://pup-record.firebaseio.com/"
+        api-key="AIzaSyDQ7aVerQHnqg0pz2wE1QDp_CXdZgaNVGg">
+    </firebase-app>
+    <firebase-auth
+      id="auth"
+      provider="google"
+      on-error="handleError"
+      signed-in="{{signedIn}}"
+      user="{{user}}">
+    </firebase-auth>
+
     <app-drawer-layout fullbleed>
 
       <!-- Drawer content -->
@@ -91,23 +102,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       <!-- Main content -->
       <app-header-layout has-scrolling-region>
-        <pup-toolbar signed-in="[[signedIn]]" on-sign-out="signOut">
-        </pup-toolbar>
 
+
+        <app-header condenses reveals effects="waterfall">
+          <app-toolbar>
+            <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
+            <div title>Pup Record</div>
+            <pup-icons signed-in="[[signedIn]]" on-sign-out="signOut">
+            </pup-icons>
+          </app-toolbar>
+        </app-header>
         <pup-login on-sign-in="signIn" signed-in="[[signedIn]]" disabled="[[!online]]">
         </pup-login>
-
-        <firebase-app auth-domain="pup-record.firebaseapp.com"
-            database-url="https://pup-record.firebaseio.com/"
-            api-key="AIzaSyDQ7aVerQHnqg0pz2wE1QDp_CXdZgaNVGg">
-        </firebase-app>
-        <firebase-auth
-          id="auth"
-          provider="google"
-          on-error="handleError"
-          signed-in="{{signedIn}}"
-          user="{{user}}">
-        </firebase-auth>
 
         <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
           <pup-dash name="dash"></pup-dash>
@@ -152,7 +158,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ],
 
       handleError: function(event, other){
-        console.log('handleError::event, other',event, other)
+        console.log('handleError::event, other',event, other);
       },
 
       _routePageChanged: function(page) {
@@ -163,17 +169,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // load page import on demand.
         this.importHref(
           this.resolveUrl('pup-' + page + '.html'), null, null, true);
-      },
-
-      computeLockIcon: function(signedIn) {
-        return signedIn ? 'lock-open' : 'lock';
-      },
-
-      lock: function() {
-        console.log('lock');
-        this.fire('sign-out');
       }
-
     });
 
   </script>
