@@ -7,10 +7,13 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
+
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<!-- <link rel="import" href="../bower_components/polymerfire/polymerfire.html"> -->
+
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
@@ -18,6 +21,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../bower_components/app-storage/app-network-status-behavior.html">
+<link rel="import" href="pup-behavior.html">
+
 <link rel="import" href="my-icons.html">
 
 <dom-module id="pup-record">
@@ -40,6 +47,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --paper-icon-button-ink-color: white;
       }
 
+      iron-icon[hidden]{
+        display: none;
+      }
+
       .drawer-list {
         margin: 0 20px;
       }
@@ -57,8 +68,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .drawer-list a.subroute {
         padding-left: 32px;
       }
-
-
     </style>
 
     <app-location route="{{route}}"></app-location>
@@ -82,21 +91,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       <!-- Main content -->
       <app-header-layout has-scrolling-region>
-
-        <pup-toolbar
-          signed-in="[[signedIn]]"
-          on-sign-out="signOut">
+        <pup-toolbar signed-in="[[signedIn]]" on-sign-out="signOut">
         </pup-toolbar>
-        <pup-login
-          on-sign-in="signIn"
-          signed-in="[[signedIn]]"
-          disabled="[[!online]]">
+
+        <pup-login on-sign-in="signIn" signed-in="[[signedIn]]" disabled="[[!online]]">
         </pup-login>
 
+        <firebase-app auth-domain="pup-record.firebaseapp.com"
+            database-url="https://pup-record.firebaseio.com/"
+            api-key="AIzaSyDQ7aVerQHnqg0pz2wE1QDp_CXdZgaNVGg">
+        </firebase-app>
         <firebase-auth
           id="auth"
-          app-name="notes"
           provider="google"
+          on-error="handleError"
           signed-in="{{signedIn}}"
           user="{{user}}">
         </firebase-auth>
@@ -120,24 +128,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       is: 'pup-record',
 
       properties: {
-        user: {},
         page: {
           type: String,
           reflectToAttribute: true,
           observer: '_pageChanged'
         },
+        signedIn: {
+          type: Boolean,
+          notify: true,
+          value: false
+        }
 
       },
+      behaviors: [ Polymer.PupAppBehavior ],
 
-      behaviors: [Polymer.PupAppBehavior],
-
-      signIn: function() {
+      signIn: function(){
+        // console.log('signIn',this.$)
         this.$.auth.signInWithPopup();
       },
 
       observers: [
         '_routePageChanged(routeData.page)'
       ],
+
+      handleError: function(event, other){
+        console.log('handleError::event, other',event, other)
+      },
 
       _routePageChanged: function(page) {
         this.page = page || 'dash';
@@ -147,6 +163,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // load page import on demand.
         this.importHref(
           this.resolveUrl('pup-' + page + '.html'), null, null, true);
+      },
+
+      computeLockIcon: function(signedIn) {
+        return signedIn ? 'lock-open' : 'lock';
+      },
+
+      lock: function() {
+        console.log('lock');
+        this.fire('sign-out');
       }
 
     });

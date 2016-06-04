@@ -28,14 +28,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     // load webcomponents polyfills
     (function() {
-      if ('registerElement' in document
-          && 'import' in document.createElement('link')
-          && 'content' in document.createElement('template')) {
+      if ('registerElement' in document && 'import' in document.createElement('link') && 'content' in document.createElement('template')) {
         // browser has web components
       } else {
         // polyfill web components
         var e = document.createElement('script');
-        e.src = '/bower_components/webcomponentsjs/webcomponents-lite.min.js';
+        e.src = 'bower_components/webcomponentsjs/webcomponents-lite.min.js';
         document.head.appendChild(e);
       }
     })();
@@ -43,23 +41,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     // load pre-caching service worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/service-worker.js');
+        navigator.serviceWorker.register('service-worker.js');
       });
     }
 
   </script>
 
-  <link rel="import" href="./bower_components/polymerfire/polymerfire.html">
-  <link rel="import" href="./src/pup-behavior.html">
-  <link rel="import" href="./src/pup-app.html">
-
-  <firebase-app auth-domain="pup-record.firebaseapp.com"
-    database-url="https://pup-record.firebaseio.com/"
-    api-key="AIzaSyDQ7aVerQHnqg0pz2wE1QDp_CXdZgaNVGg">
-
-    <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError">
-    </firebase-auth>
-  </firebase-app>
+  <link rel="import" href="src/pup-app.html">
+    <link rel="import" href="src/pup-elements.html">
 
 
   <style>

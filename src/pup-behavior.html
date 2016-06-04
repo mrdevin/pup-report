@@ -1,6 +1,7 @@
-<link rel="import" href="../bower_components/app-storage/app-network-status-behavior.html">
+<link rel="import" href="/bower_components/app-storage/app-network-status-behavior.html">
+
 <script>
-  (function(){
+(function() {
     'use strict';
 
     Polymer.PupAppBehaviorImpl = {
@@ -11,12 +12,7 @@
         }
       },
 
-
-
-
-
-
-      commitChange(event) {
+      commitChange: function(event) {
         var changeCommits;
 
         switch (event.detail) {
@@ -38,7 +34,7 @@
         }
       },
 
-      save() {
+      save: function() {
         if (this.$.document.isNew &&
             (this.editableNote.title ||
              this.editableNote.body)) {
@@ -50,7 +46,7 @@
         return Promise.resolve();
       },
 
-      delete() {
+      delete: function() {
         if (!this.$.document.isNew) {
           this.$.document.destroy();
         }
@@ -58,16 +54,17 @@
         return Promise.resolve();
       },
 
-      signOut() {
+      signOut: function() {
+        console.log('signOut');
         if (this.$.auth) {
           this.$.auth.signOut();
         }
       }
-    };
+  };
 
     Polymer.PupAppBehavior = [
-      Polymer.AppNetworkStatusBehavior,
-      Polymer.PupAppBehaviorImpl
+        Polymer.PupAppBehaviorImpl,
+        Polymer.AppNetworkStatusBehavior
     ];
-  })();
+})();
 </script>

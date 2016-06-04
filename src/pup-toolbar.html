@@ -11,9 +11,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/app-storage/app-network-status-behavior.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-storage/app-network-status-behavior.html">
+<link rel="import" href="pup-behavior.html">
 
 
 <dom-module id="pup-toolbar">
@@ -39,6 +42,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       iron-icon {
         margin-right: 0.5em;
       }
+      iron-icon[hidden]{
+        display: none;
+      }
+
+      app-header {
+        width: 100%;
+      }
+
 
       @media (min-width: 640px) {
         iron-icon,
@@ -55,30 +66,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-header condenses reveals effects="waterfall">
       <app-toolbar>
         <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-        <h1 title>Pup Record</h1>
+        <div title>Pup Record</div>
         <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
         <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
-        <paper-icon-button
-            icon="[[computeLockIcon(signedIn)]]"
-            disabled="[[!signedIn]]"
-            on-tap="lock">
+        <paper-icon-button icon="[[computeLockIcon(signedIn)]]" disabled="[[!signedIn]]" on-click="lock">
         </paper-icon-button>
       </app-toolbar>
     </app-header>
-
-
-
-    <iron-icon icon="bookmark"></iron-icon>
-    <h1>Notes</h1>
-
   </template>
   <script>
     Polymer({
       is: 'pup-toolbar',
 
-      // behaviors: [
-      //   Polymer.AppNetworkStatusBehavior
-      // ],
+      behaviors: [ Polymer.PupAppBehavior ],
 
       properties: {
         signedIn: {
@@ -93,6 +93,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       lock: function() {
+        console.log('lock');
         this.fire('sign-out');
       }
     });
