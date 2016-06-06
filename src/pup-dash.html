@@ -7,71 +7,184 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
-
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
+<!-- <link rel="import" href="/bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html"> -->
+
+<link rel="import" href="/src/pup-act.html">
 <dom-module id="pup-dash">
+    <template>
+        <style>
+            :host {
+                display: block;
+                padding: 10px;
+            }
 
-  <template>
+            .card {
+                box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+                padding: 16px;
+                margin: 24px;
+                border-radius: 5px;
+                background-color: #fff;
+                color: #757575;
+            }
 
-    <style>
-      :host {
-        display: block;
-        padding: 10px;
-      }
-      .card {
-        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-        padding: 16px;
-        margin: 24px;
-        border-radius: 5px;
-        background-color: #fff;
-        color: #757575;
-      }
-      .circle {
-        display: inline-block;
-        height: 64px;
-        width: 64px;
-        border-radius: 50%;
-        background: #ddd;
-        line-height: 64px;
-        font-size: 30px;
-        color: #555;
-        text-align: center;
-      }
-      h1 {
-        font-size: 22px;
-        margin: 16px 0;
-        color: #212121;
-      }
-    </style>
+            .circle {
+                display: inline-block;
+                height: 64px;
+                width: 64px;
+                border-radius: 50%;
+                background: #ddd;
+                line-height: 64px;
+                font-size: 30px;
+                color: #555;
+                text-align: center;
+            }
 
-    <div class="card">
-      <h1>Dashboard</h1>
-      <a>mark Eat</a>
-      </br>
-      <a>mark Pee'd</a>
-      </br>
-      <a>mark Poo'd</a>
-      </br>
-      <a>start Walk</a>
-      </br>
-      <a>stop Walk</a>
-      </br>
-      <a>start Sleep</a>
-      </br>
-      <a>stop Sleep</a>
-    </div>
+            h1 {
+                font-size: 22px;
+                margin: 16px 0;
+                color: #212121;
+            }
+        </style>
 
-  </template>
+        <firebase-document
+            id="activity"
+            path="{{activityId}}"
+            data="{{activity}}">
+        </firebase-document>
 
-  <script>
 
+        <firebase-query
+            id="activities"
+            path="user/{{user.uid}}/pup/duid/activities"
+            order-by-child="start"
+            data="{{data}}">
+        </firebase-query>
+
+<!--         <app-indexeddb-mirror
+            session="[[user.uid]]"
+            key="activities"
+            data="{{data}}"
+            persisted-data="{{persistedData}}">
+        </app-indexeddb-mirror> -->
+
+        <h1>Dashboard</h1>
+        <paper-button on-tap="markPee" user-uid$="[[user.uid]]" disabled="[[!online]]" aria-label="Mark Pee">
+            <iron-icon icon="add"></iron-icon>
+            mark Pee
+        </paper-button>
+
+        <paper-button on-tap="markPoo" user-uid$="[[user.uid]]" disabled="[[!online]]" aria-label="Mark Poo">
+            <iron-icon icon="add"></iron-icon>
+            mark Poo
+        </paper-button>
+
+        <paper-button on-tap="markEat" user-uid$="[[user.uid]]" disabled="[[!online]]" aria-label="Mark Eat">
+            <iron-icon icon="add"></iron-icon>
+            mark Eat
+        </paper-button>
+
+        <template is="dom-repeat" items="{{data}}" sort="_sortByDate">
+            <div class="card">
+                <div>[[item.type]]
+                [[formatDateTime(item.start)]]
+                <template is="dom-if" if="[[dateNotSame(item.start,item.stop)]]">
+                    [[formatDateTime(item.stop)]]
+                </template>
+                <template is="dom-if" if="[[item.amount]]">
+                    AMOUNT : [[item.amount]] gr
+                </template>
+                </div>
+            </div>
+        </template>
+
+    </template>
+    <script>
     Polymer({
 
-      is: 'pup-dash'
+        is: 'pup-dash',
+        properties: {
+            user: {
+                type: Object,
+                notify:true
+            },
+            data: {
+                type: Object,
+                notify:true
+            },
+            activity: {
+              type: Object,
+              notify: true
+            },
+            activityId: {
+              type: String,
+              notify: true,
+              value: null
+            }
+        },
 
+        setDefaultActivityVals: function(){
+
+            // this.activityId = null;
+
+            this.activity = {
+                start: Date.now(),
+                stop: Date.now(),
+                type: null
+            };
+
+        },
+
+        markPee: function(e){
+            this.setDefaultActivityVals();
+            console.log('markPee', this.activity, this.activityId);
+            this.activity.type = 'pee';
+            console.log('markPee2', this.activity);
+            return this.activitySave(e.target.getAttribute('user-uid'));
+        },
+
+        markPoo: function(e){
+            this.setDefaultActivityVals();
+            this.activity.type = 'poo';
+            return this.activitySave(e.target.getAttribute('user-uid'));
+        },
+
+        markEat: function(e){
+            this.setDefaultActivityVals();
+            this.activity.type = 'eat';
+            this.activity.amount = 200;
+            return this.activitySave(e.target.getAttribute('user-uid'));
+        },
+
+        activitySave: function(userUid){
+            var doc = this.$.activity;
+            return this.$.activity.save('/user/' + userUid + '/pup/duid/activities' ).then(function(){
+                doc.reset();
+            });
+        },
+
+        behaviors: [ Polymer.PupAppBehavior ],
+
+        _sortByDate: function(a, b) {
+            // console.linkog('sort', a, b);
+          return a.stop > b.stop ? -1 : 1;
+        },
+
+        formatDateTime: function(givenDateStr){
+            var date = new Date(givenDateStr),
+                day = date.getDate(),
+                month = date.getMonth() + 1,
+                year = date.getFullYear(),
+                hours = date.getHours(),
+                minutes = date.getMinutes(),
+                seconds = date.getSeconds();
+            return hours +':'+ minutes +'-'+ day +'.'+ month;
+        },
+        dateNotSame: function(start, stop){
+            return start !== stop;
+
+        }
     });
-
-  </script>
-
+    </script>
 </dom-module>

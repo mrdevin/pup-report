@@ -76,7 +76,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         data="{{routeData}}"
         tail="{{subroute}}"></app-route>
 
-    <firebase-app auth-domain="pup-record.firebaseapp.com"
+    <firebase-app
+        auth-domain="pup-record.firebaseapp.com"
         database-url="https://pup-record.firebaseio.com/"
         api-key="AIzaSyDQ7aVerQHnqg0pz2wE1QDp_CXdZgaNVGg">
     </firebase-app>
@@ -89,7 +90,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </firebase-auth>
 
     <app-drawer-layout fullbleed>
-
       <!-- Drawer content -->
       <app-drawer>
         <app-toolbar>Menu</app-toolbar>
@@ -103,7 +103,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <!-- Main content -->
       <app-header-layout has-scrolling-region>
 
-
         <app-header condenses reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
@@ -116,7 +115,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </pup-login>
 
         <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
-          <pup-dash name="dash"></pup-dash>
+          <pup-dash name="dash" user="{{user}}"></pup-dash>
           <pup-stats name="stats"></pup-stats>
           <pup-settings name="settings"></pup-settings>
         </iron-pages>
@@ -144,13 +143,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true,
           value: false
         }
-
       },
       behaviors: [ Polymer.PupAppBehavior ],
 
       signIn: function(){
         // console.log('signIn',this.$)
-        this.$.auth.signInWithPopup();
+        this.$.auth.signInWithPopup()
+        .then(function(response) {
+          this.getOrCreatePack();
+        })
+        .catch(function(error) {});
       },
 
       observers: [

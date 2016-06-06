@@ -6,60 +6,32 @@
 
     Polymer.PupAppBehaviorImpl = {
       properties: {
-        editableNoteId: {
+
+        pup: {
+          type: Object,
+          notify: true,
+          value: {
+            when: Date.now()
+          },
+        },
+        pupId: {
           type: String,
-          notify: true
+          notify: true,
+          value: null
         }
       },
 
-      commitChange: function(event) {
-        var changeCommits;
-
-        switch (event.detail) {
-          case 'save':
-            changeCommits = this.save();
-            break;
-          case 'delete':
-            changeCommits = this.delete();
-            break;
-          default:
-            changeCommits = Promise.resolve();
-            break;
-        }
-
-        if (this.$.query && this.$.query.refresh) {
-          changeCommits.then(function() {
-            this.$.query.refresh();
-          });
-        }
+      pupPath: function(duid){
+        return this.$.pee.save('/pup/' + e.target.getAttribute('user-uid') +'/' + duid);
       },
 
-      save: function() {
-        if (this.$.document.isNew &&
-            (this.editableNote.title ||
-             this.editableNote.body)) {
-          return this.$.document.save(this.notesPath).then(function(){
-            this.$.document.reset();
-          });
-        }
-
-        return Promise.resolve();
-      },
-
-      delete: function() {
-        if (!this.$.document.isNew) {
-          this.$.document.destroy();
-        }
-
-        return Promise.resolve();
-      },
 
       signOut: function() {
         console.log('signOut');
         if (this.$.auth) {
           this.$.auth.signOut();
         }
-      }
+      },
   };
 
     Polymer.PupAppBehavior = [

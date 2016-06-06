@@ -19,7 +19,8 @@
     "polymerfire": "firebase/polymerfire",
     "iron-icons": "polymerelements/iron-icons",
     "app-storage": "polymerelements/app-storage",
-    "polymer": "1.5.0"
+    "polymer": "1.5.0",
+    "time-elements": "^0.5.0"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"
