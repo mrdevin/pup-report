@@ -1,0 +1,180 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="/bower_components/paper-styles/color.html">
+<link rel="import" href="/bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="/bower_components/paper-button/paper-button.html">
+<!-- <link rel="import" href="pup-pup.html"> -->
+<dom-module id="pup-edit">
+  <template>
+    <style>
+      :host {
+        display: none;
+        position: absolute;
+        overflow: hidden;
+        top: 46px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+        transition-property: opacity, background-color;
+        transition-duration: .3s;
+        transition-delay: .1s
+        opacity: 0;
+      }
+
+      :host([opened]) {
+        display: block;
+        opacity: 1;
+        background-color: var(--paper-purple-500);
+      }
+
+      paper-button {
+        color: var(--paper-purple-50);
+      }
+
+      #background {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        border-radius: 512px;
+        width: 256px;
+        height: 256px;
+        background-color: var(--paper-purple-500);
+        transform-origin: 128px 128px;
+      }
+
+      input[type='text'] {
+        display: block;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        transition: opacity 3s linear;
+        opacity: 0;
+        box-sizing: border-box;
+        background-color: #fafafa;
+        color: #212121;
+        padding: 1em;
+        @apply(--paper-font-common-base);
+        @apply(--shadow-elevation-2dp);
+        border-radius: 2px;
+      }
+
+      :host([opened]) input[type='text'] {
+        position: relative;
+        margin: auto;
+        width: calc(100vw - 20px);
+        max-width: 480px;
+        margin-top: 3em;
+        opacity: 1;
+      }
+
+      .controls {
+        display: block;
+        position: relative;
+        margin: 10px auto;
+        width: calc(100vw - 20px);
+        max-width: 480px;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        justify-content: space-between;
+        transition: opacity .3s;
+        opacity: 0;
+      }
+
+      :host([opened]) .controls {
+        opacity: 1;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      input[type='text'] {
+        font-size: 1.15em;
+        margin: 0;
+        white-space: pre-wrap;
+      }
+
+      input[type='text']:not(.hidden)+p {
+        margin-top: 1em;
+      }
+
+      p {
+        margin: 0;
+        font-family: 'Roboto Slab', Times New Roman, serif;
+        font-size: 0.9em;
+        white-space: pre-wrap;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .empty {
+        font-style: italic;
+        color: #737373;
+        line-height: 0;
+        pointer-events: none;
+      }
+    </style>
+    <div id="background"></div>
+    <input id="pupName" type="text" placeholder="Pup's Name" value="{{name::input}}"/>
+    <div class="controls">
+      <paper-button on-tap="delete">Delete</paper-button>
+      <paper-button on-tap="save">Done</paper-button>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'pup-edit',
+
+      properties: {
+        name: {
+            type: String,
+            notify: true,
+            observer: "iAmChanged"
+        },
+        opened: {
+          type: Boolean,
+          reflectToAttribute: true,
+          readOnly: true,
+          value: false
+        },
+
+      },
+
+      open: function() {
+        this.create();
+        this._setOpened(true);
+      },
+
+      create: function() {
+        var setOpened = this.opened;
+      },
+
+      save: function() {
+        this.close('save');
+      },
+
+      delete: function() {
+        this.close('delete');
+      },
+
+      close: function(detail) {
+        var thePup = this.$.pup;
+
+        this.fire('close', detail, { bubbles: false });
+        this._setOpened(false);
+      }
+
+    });
+  </script>
+</dom-module>

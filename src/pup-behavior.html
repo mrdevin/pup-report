@@ -5,26 +5,6 @@
     'use strict';
 
     Polymer.PupAppBehaviorImpl = {
-      properties: {
-
-        pup: {
-          type: Object,
-          notify: true,
-          value: {
-            when: Date.now()
-          },
-        },
-        pupId: {
-          type: String,
-          notify: true,
-          value: null
-        }
-      },
-
-      pupPath: function(duid){
-        return this.$.pee.save('/pup/' + e.target.getAttribute('user-uid') +'/' + duid);
-      },
-
 
       signOut: function() {
         console.log('signOut');

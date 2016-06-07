@@ -8,8 +8,8 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 
-<!-- <link rel="import" href="/bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html"> -->
 
 <link rel="import" href="/src/pup-act.html">
 <dom-module id="pup-dash">
@@ -57,9 +57,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <firebase-query
             id="activities"
-            path="user/{{user.uid}}/pup/duid/activities"
-            order-by-child="start"
-            data="{{data}}">
+            path="/pup/{{pupId}}/activities"
+            data="{{pupactivities}}">
         </firebase-query>
 
 <!--         <app-indexeddb-mirror
@@ -70,22 +69,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </app-indexeddb-mirror> -->
 
         <h1>Dashboard</h1>
-        <paper-button on-tap="markPee" user-uid$="[[user.uid]]" disabled="[[!online]]" aria-label="Mark Pee">
+        <paper-button on-tap="markPee" user-uid$="[[user.uid]]" pup-id$="[[pupId]]" disabled="[[!online]]" aria-label="Mark Pee">
             <iron-icon icon="add"></iron-icon>
             mark Pee
         </paper-button>
 
-        <paper-button on-tap="markPoo" user-uid$="[[user.uid]]" disabled="[[!online]]" aria-label="Mark Poo">
+        <paper-button on-tap="markPoo" user-uid$="[[user.uid]]" pup-id$="[[pupId]]" disabled="[[!online]]" aria-label="Mark Poo">
             <iron-icon icon="add"></iron-icon>
             mark Poo
         </paper-button>
 
-        <paper-button on-tap="markEat" user-uid$="[[user.uid]]" disabled="[[!online]]" aria-label="Mark Eat">
+        <paper-button on-tap="markEat" user-uid$="[[user.uid]]" pup-id$="[[pupId]]"  disabled="[[!online]]" aria-label="Mark Eat">
             <iron-icon icon="add"></iron-icon>
             mark Eat
         </paper-button>
 
-        <template is="dom-repeat" items="{{data}}" sort="_sortByDate">
+        <template is="dom-repeat" items="{{pupactivities}}" sort="_sortByDate">
             <div class="card">
                 <div>[[item.type]]
                 [[formatDateTime(item.start)]]
@@ -107,11 +106,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         properties: {
             user: {
                 type: Object,
-                notify:true
+                notify: true
             },
-            data: {
+            pupId: {
                 type: Object,
-                notify:true
+                notify: true
+            },
+            pupactivities: {
+                type: Object,
+                notify:true,
+                observer: 'wtfm'
             },
             activity: {
               type: Object,
@@ -124,16 +128,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
         },
 
+        wtfm: function(){
+            console.log('pupactivities', this.pupactivities);
+        },
+
         setDefaultActivityVals: function(){
-
-            // this.activityId = null;
-
+            console.log()
             this.activity = {
                 start: Date.now(),
                 stop: Date.now(),
                 type: null
             };
-
         },
 
         markPee: function(e){
@@ -141,25 +146,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             console.log('markPee', this.activity, this.activityId);
             this.activity.type = 'pee';
             console.log('markPee2', this.activity);
-            return this.activitySave(e.target.getAttribute('user-uid'));
+            return this.activitySave(e.target.getAttribute('user-uid'), e.target.getAttribute('pup-id'));
         },
 
         markPoo: function(e){
             this.setDefaultActivityVals();
             this.activity.type = 'poo';
-            return this.activitySave(e.target.getAttribute('user-uid'));
+            return this.activitySave(e.target.getAttribute('user-uid'), e.target.getAttribute('pup-id'));
         },
 
         markEat: function(e){
             this.setDefaultActivityVals();
             this.activity.type = 'eat';
             this.activity.amount = 200;
-            return this.activitySave(e.target.getAttribute('user-uid'));
+            return this.activitySave(e.target.getAttribute('user-uid'), e.target.getAttribute('pup-id'));
         },
 
-        activitySave: function(userUid){
+        activitySave: function(userUid, pupId){
+            console.log('this', this.$)
             var doc = this.$.activity;
-            return this.$.activity.save('/user/' + userUid + '/pup/duid/activities' ).then(function(){
+            this.activity.user =  userUid;
+            if(pupId === null || pupId === undefined){
+                console.error("no Puppy id, can't save::userUid, pupUid",userUid, pupId);
+                return;
+            }
+            return this.$.activity.save('/pup/' + pupId + '/activities/' ).then(function(){
                 doc.reset();
             });
         },
@@ -167,7 +178,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         behaviors: [ Polymer.PupAppBehavior ],
 
         _sortByDate: function(a, b) {
-            // console.linkog('sort', a, b);
           return a.stop > b.stop ? -1 : 1;
         },
 

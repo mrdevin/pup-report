@@ -25,6 +25,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/app-storage/app-network-status-behavior.html">
 <link rel="import" href="pup-behavior.html">
 
+<link rel="import" href="pup-edit.html">
 <link rel="import" href="my-icons.html">
 
 <dom-module id="pup-record">
@@ -89,6 +90,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       user="{{user}}">
     </firebase-auth>
 
+    <firebase-document
+        id="newPup"
+        path="{{pupId}}"
+        data="{{pup}}">
+    </firebase-document>
+
+    <firebase-query
+        id="pupQuery"
+        path="/pup"
+        limit-to-first='1'
+        data="{{pups}}">
+    </firebase-query>
+
     <app-drawer-layout fullbleed>
       <!-- Drawer content -->
       <app-drawer>
@@ -111,14 +125,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </pup-icons>
           </app-toolbar>
         </app-header>
+
         <pup-login on-sign-in="signIn" signed-in="[[signedIn]]" disabled="[[!online]]">
         </pup-login>
 
+        <pup-edit
+            id="pupEditor"
+            class="open"
+            opened
+            name="{{name}}"
+            on-close="commitChange">
+        </pup-edit>
+
+
+
+        <template is="dom-repeat" items="{{pups}}">
+            dings: {{item.name}}
+        </template>
+
         <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
-          <pup-dash name="dash" user="{{user}}"></pup-dash>
+          <pup-dash name="dash" user={{user}} pup-id=[[pupId]] ></pup-dash>
           <pup-stats name="stats"></pup-stats>
           <pup-settings name="settings"></pup-settings>
         </iron-pages>
+
 
       </app-header-layout>
 
@@ -130,50 +160,112 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     Polymer({
 
-      is: 'pup-record',
+        is: 'pup-record',
 
-      properties: {
-        page: {
-          type: String,
-          reflectToAttribute: true,
-          observer: '_pageChanged'
+        properties: {
+            page: {
+                type: String,
+                reflectToAttribute: true,
+                observer: '_pageChanged'
+            },
+            signedIn: {
+                type: Boolean,
+                notify: true,
+                value: false
+            },
+            pups: {
+                type: Object,
+                notify: true
+            },
+            pupId: {
+                type: String,
+                notify: true
+            }
+
         },
-        signedIn: {
-          type: Boolean,
-          notify: true,
-          value: false
+        behaviors: [ Polymer.PupAppBehavior ],
+
+        observers: [
+            '_routePageChanged(routeData.page)',
+            '_signInChanged(signedIn, pups.length)',
+            '_signInChanged(pups[1].uid)'
+        ],
+
+        signIn: function(){
+            // console.log('signIn',this.$)
+            this.$.auth.signInWithPopup().then(function(response) {}).catch(function(error) {});
+        },
+
+
+        pupPath: function(){
+            return '/pup/';
+        },
+
+        commitChange: function(event) {
+            var changeCommits;
+
+            switch (event.detail) {
+                case 'save':
+                    changeCommits = this.save();
+                    break;
+                case 'delete':
+                    changeCommits = this.delete();
+                    break;
+                default:
+                    changeCommits = Promise.resolve();
+                    break;
+            }
+
+            if (this.$.pupQuery && this.$.pupQuery.refresh) {
+                changeCommits.then(function(){
+                    console.log('changeCommits');
+                    this.$.pupQuery.refresh();
+                });
+            }
+       },
+
+        save: function() {
+
+            var thePup = this.$.newPup;
+            this.pup.name = this.$.pupEditor.$.pupName.value,
+            this.pup.owner = this.user.uid;
+            return thePup.save(this.pupPath()).then(function(){
+                thePup.reset();
+            });
+        },
+
+        delete: function() {
+            if (!this.$.newPup.isNew) {
+              this.$.newPup.destroy();
+            }
+            return Promise.resolve();
+        },
+
+        handleError: function(event, other){
+            console.log('handleError::event, other',event, other);
+        },
+
+        _routePageChanged: function(page) {
+            this.page = page || 'dash';
+        },
+
+        _pageChanged: function(page) {
+            // load page import on demand.
+            this.importHref(
+              this.resolveUrl('pup-' + page + '.html'), null, null, true);
+        },
+
+        _signInChanged: function(signedIn, pupsLength){
+            console.log('pupsLength', pupsLength);
+            if(signedIn && pupsLength === 0){
+
+                this.$.pupEditor.open(null);
+            }else if(pupsLength === 1){
+                this.$.pupEditor.close(null);
+                this.pupId = this.pups[0].$key;
+            }
+
         }
-      },
-      behaviors: [ Polymer.PupAppBehavior ],
-
-      signIn: function(){
-        // console.log('signIn',this.$)
-        this.$.auth.signInWithPopup()
-        .then(function(response) {
-          this.getOrCreatePack();
-        })
-        .catch(function(error) {});
-      },
-
-      observers: [
-        '_routePageChanged(routeData.page)'
-      ],
-
-      handleError: function(event, other){
-        console.log('handleError::event, other',event, other);
-      },
-
-      _routePageChanged: function(page) {
-        this.page = page || 'dash';
-      },
-
-      _pageChanged: function(page) {
-        // load page import on demand.
-        this.importHref(
-          this.resolveUrl('pup-' + page + '.html'), null, null, true);
-      }
     });
-
   </script>
-
 </dom-module>
