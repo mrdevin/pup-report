@@ -54,17 +54,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             data="{{activity}}">
         </firebase-document>
 
-
-        <firebase-query
-            id="activities"
-            path="/pup/{{pupId}}/activities"
-            data="{{pupactivities}}">
-        </firebase-query>
-
-<!--         <app-indexeddb-mirror
+        <template is="dom-if" if="{{pupId}}">
+            <firebase-query
+                id="activities"
+                path="/pup/{{pupId}}/activities"
+                data={{data}}>
+            </firebase-query>
+        </template>
+<!--
+        <app-indexeddb-mirror
             session="[[user.uid]]"
             key="activities"
-            data="{{data}}"
+            data="{{pupactivities}}"
             persisted-data="{{persistedData}}">
         </app-indexeddb-mirror> -->
 
@@ -83,8 +84,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <iron-icon icon="add"></iron-icon>
             mark Eat
         </paper-button>
-
-        <template is="dom-repeat" items="{{pupactivities}}" sort="_sortByDate">
+        <template is="dom-repeat" items="[[data]]" sort="_sortByDate" >
             <div class="card">
                 <div>[[item.type]]
                 [[formatDateTime(item.start)]]
@@ -110,11 +110,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             },
             pupId: {
                 type: Object,
-                notify: true
+                notify: true,
+                observer: 'wtfm'
             },
-            pupactivities: {
+            data: {
                 type: Object,
-                notify:true,
+                notify:false,
                 observer: 'wtfm'
             },
             activity: {
@@ -128,8 +129,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
         },
 
-        wtfm: function(){
-            console.log('pupactivities', this.pupactivities);
+        wtfm: function(newD, oldD){
+            console.log('wtfm', newD, oldD);
         },
 
         setDefaultActivityVals: function(){

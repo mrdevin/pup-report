@@ -5,13 +5,12 @@
     'use strict';
 
     Polymer.PupAppBehaviorImpl = {
-
-      signOut: function() {
-        console.log('signOut');
-        if (this.$.auth) {
-          this.$.auth.signOut();
-        }
-      },
+        signOut: function() {
+            console.log('signOut');
+            if (this.$.auth) {
+                this.$.auth.signOut();
+            }
+        },
   };
 
     Polymer.PupAppBehavior = [
