@@ -46,13 +46,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
 
     <div class="card">
-      <h1>Settings</h1>
-      name
-      email
-      dogs
+      <h1>Your Account</h1>
+      <img src="{{user.photoURL}}" alt="user photo">
+      <dl>
+            <dt>name:</dt>
+            <dd>{{user.displayName}}</dd>
 
-      remove account
+            <dt>email</dt>
+            <dd>{{user.email}}</dd>
 
+            <dt>id:</dt>
+            <dd>{{user.uid}}</dd>
+      </dl>
     </div>
 
   </template>
@@ -61,7 +66,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     Polymer({
 
-      is: 'pup-settings'
+        is: 'pup-settings',
+        properties: {
+            pupName: {
+                type: String
+            },
+            user: {
+                type: Object,
+                notify: true,
+                observer: 'userChange'
+            }
+        },
+
+        userChange: function(newData, oldData){
+            console.log('newData, oldData',newData, oldData, this.user);
+        }
 
     });
 

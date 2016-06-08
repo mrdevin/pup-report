@@ -11,7 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 
 
-<link rel="import" href="/src/pup-act.html">
+<!-- <link rel="import" href="/src/pup-act.html"> -->
 <dom-module id="pup-dash">
     <template>
         <style>
@@ -46,6 +46,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 margin: 16px 0;
                 color: #212121;
             }
+
+            paper-button {
+                background-color: var(--paper-purple-500);
+                color: white;
+            }
         </style>
 
         <firebase-document
@@ -71,18 +76,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <h1>Dashboard</h1>
         <paper-button on-tap="markPee" user-uid$="[[user.uid]]" pup-id$="[[pupId]]" disabled="[[!online]]" aria-label="Mark Pee">
-            <iron-icon icon="add"></iron-icon>
-            mark Pee
+            <iron-icon icon="invert-colors"></iron-icon>
         </paper-button>
 
         <paper-button on-tap="markPoo" user-uid$="[[user.uid]]" pup-id$="[[pupId]]" disabled="[[!online]]" aria-label="Mark Poo">
-            <iron-icon icon="add"></iron-icon>
-            mark Poo
+            <iron-icon icon="pets"></iron-icon>
         </paper-button>
 
         <paper-button on-tap="markEat" user-uid$="[[user.uid]]" pup-id$="[[pupId]]"  disabled="[[!online]]" aria-label="Mark Eat">
-            <iron-icon icon="add"></iron-icon>
-            mark Eat
+            <iron-icon icon="social:cake"></iron-icon>
         </paper-button>
         <template is="dom-repeat" items="[[data]]" sort="_sortByDate" >
             <div class="card">
@@ -134,7 +136,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         setDefaultActivityVals: function(){
-            console.log()
+            // console.log()
             this.activity = {
                 start: Date.now(),
                 stop: Date.now(),
@@ -144,9 +146,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         markPee: function(e){
             this.setDefaultActivityVals();
-            console.log('markPee', this.activity, this.activityId);
+            // console.log('markPee', this.activity, this.activityId);
             this.activity.type = 'pee';
-            console.log('markPee2', this.activity);
+            // console.log('markPee2', this.activity);
             return this.activitySave(e.target.getAttribute('user-uid'), e.target.getAttribute('pup-id'));
         },
 

@@ -47,6 +47,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --paper-icon-button-ink-color: white;
       }
 
+      app-toolbar {
+        background-color: var(--paper-purple-500);
+      }
+
       iron-icon[hidden]{
         display: none;
       }
@@ -103,7 +107,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         data="{{pups}}">
     </firebase-query>
 
-<!--     <app-indexeddb-mirror
+<!--<app-indexeddb-mirror
         session="[[user.uid]]"
         key="activities"
         data="{{pupactivities}}"
@@ -113,10 +117,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-drawer-layout fullbleed>
       <!-- Drawer content -->
       <app-drawer>
-        <app-toolbar>Menu</app-toolbar>
+        <app-toolbar><img src="{{user.photoURL}}" alt="user photo"></app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="dash" href="/dash">Dashboard</a>
-          <a name="stats" href="/stats">What, Where, When</a>
           <a name="settings" href="/settings">Settings</a>
         </iron-selector>
       </app-drawer>
@@ -149,13 +152,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 
         <template is="dom-repeat" items="{{pups}}">
-            dings: {{item.name}}
+            dog: {{item.name}}
+            id: {{item.$key}}
         </template>
 
         <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
           <pup-dash name="dash" user={{user}} pup-id=[[pupId]] ></pup-dash>
-          <pup-stats name="stats"></pup-stats>
-          <pup-settings name="settings"></pup-settings>
+          <pup-settings name="settings" user={{user}} pups=[[pups]]></pup-settings>
         </iron-pages>
 
 
@@ -184,13 +187,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             },
             pups: {
                 type: Object,
-                notify: true,
-                observer: 'wtfm'
+                notify: true
             },
             pupId: {
                 type: String,
-                notify: true,
-                // observer: 'wtfm'
+                notify: true
             }
 
         },
@@ -198,20 +199,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         observers: [
             '_routePageChanged(routeData.page)',
-            '_signInChanged(signedIn, pups.length, page)',
-            '_signInChanged(pups[1].uid)'
+            '_signInChanged(signedIn, pups.length, page)'
         ],
 
         signIn: function(){
             // console.log('signIn',this.$)
             this.$.auth.signInWithPopup().then(function(response) {}).catch(function(error) {});
-        },
-
-        wtfm: function(newData, oldData){
-            if(newData !== undefined && typeof newData === typeof oldData){
-                console.log('signedIn, newData', this.signedIn, newData.length, typeof newData, typeof oldData);
-
-            }
         },
 
         pupPath: function(){
@@ -272,12 +265,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               this.resolveUrl('pup-' + page + '.html'), null, null, true);
         },
 
-        _signInChanged: function(signedIn, pupsLength){
+        _signInChanged: function(signedIn, pupsLength, page){
             console.log('pupsLength', pupsLength, this.$);
             if(this.pups === undefined){
                 return;
             }
-            if(signedIn && pupsLength === 0){
+            if(signedIn && pupsLength === 0 && page === 'dash'){
 
                 this.$.pupEditor.open(null);
             }else if(pupsLength === 1){
